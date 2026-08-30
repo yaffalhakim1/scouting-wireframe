@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI Scouting Workstation — Wireframe</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2330;
+    --border: #2a3340;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #3b82f6;
+    --accent-2: #22c55e;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 13px;
+  }
+  .app { display: grid; grid-template-columns: 260px 1fr 340px; grid-template-rows: 48px 1fr; height: 100vh; }
+  /* Top bar */
+  .topbar { grid-column: 1 / 4; display: flex; align-items: center; gap: 16px; padding: 0 16px; background: var(--panel); border-bottom: 1px solid var(--border); }
+  .topbar .logo { font-weight: 700; color: var(--accent); }
+  .topbar .crumb { color: var(--muted); }
+  .topbar .job { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--accent-2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); }
+
+  /* Left: formation/strategy list */
+  .sidebar { background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; padding: 12px; }
+  .sidebar h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 14px 0 8px; }
+  .strat { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; border-radius: 7px; cursor: pointer; border: 1px solid transparent; }
+  .strat:hover { background: var(--panel-2); }
+  .strat.active { background: var(--panel-2); border-color: var(--accent); }
+  .strat .name { font-weight: 600; }
+  .strat .meta { color: var(--muted); font-size: 11px; }
+  .count { background: var(--accent); color: #fff; border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 600; }
+
+  /* Center: video + timeline */
+  .stage { display: flex; flex-direction: column; padding: 14px; gap: 12px; overflow-y: auto; }
+  .viewer { position: relative; background: #000; border-radius: 10px; aspect-ratio: 16/9; overflow: hidden; border: 1px solid var(--border); }
+  .viewer .court { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #1f2937; font-size: 40px; }
+  .viewer .overlay { position: absolute; inset: 0; }
+  .player-dot { position: absolute; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid #fff; transform: translate(-50%,-50%); }
+  .player-dot.b { background: var(--warn); }
+  .arrow { position: absolute; height: 2px; background: var(--accent-2); transform-origin: left; }
+  .ball { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #fff; border: 1px solid #000; transform: translate(-50%,-50%); }
+  .label { position: absolute; background: rgba(0,0,0,.65); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; transform: translate(-50%,-50%); white-space: nowrap; }
+  .controls { display: flex; align-items: center; gap: 10px; }
+  .controls button { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 6px 10px; cursor: pointer; }
+  .timeline { position: relative; height: 34px; background: var(--panel-2); border-radius: 6px; border: 1px solid var(--border); }
+  .seg { position: absolute; top: 6px; bottom: 6px; border-radius: 3px; background: var(--accent); opacity: .55; cursor: pointer; }
+  .seg.other { background: var(--muted); }
+  .seg.cur { outline: 2px solid #fff; opacity: .9; }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; }
+
+  /* Right: tactical explanation + correction */
+  .panel { background: var(--panel); border-left: 1px solid var(--border); padding: 14px; overflow-y: auto; }
+  .panel h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin-bottom: 10px; }
+  .seq { list-style: none; }
+  .seq li { display: flex; gap: 10px; padding: 8px 0; border-left: 2px solid var(--border); padding-left: 12px; margin-left: 6px; }
+  .seq li .step { color: var(--muted); font-size: 11px; min-width: 54px; }
+  .seq li .ev { color: var(--text); }
+  .conf { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(34,197,94,.15); color: var(--accent-2); margin-left: 6px; }
+  .correction { margin-top: 16px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; }
+  .correction .row { display: flex; gap: 8px; margin-top: 8px; }
+  .correction button { flex: 1; border: 1px solid var(--border); background: var(--panel); color: var(--text); border-radius: 6px; padding: 7px; cursor: pointer; }
+  .correction button.ok { border-color: var(--accent-2); color: var(--accent-2); }
+  .correction button.no { border-color: var(--warn); color: var(--warn); }
+  select { width: 100%; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 7px; margin-top: 8px; }
+  .tendency { margin-top: 16px; }
+  .bar { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  .bar .lbl { width: 70px; color: var(--muted); font-size: 11px; }
+  .bar .track { flex: 1; height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; }
+  .bar .fill { height: 100%; background: var(--accent); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <span class="logo">◆ ScoutAI</span>
+    <span class="crumb">/ Opponent: Wildcats / Last 3 Games</span>
+    <span class="job"><span class="dot"></span> 3 games processed</span>
+  </div>
+
+  <!-- LEFT: STRATEGY LIST -->
+  <div class="sidebar">
+    <h3>Top Formations</h3>
+    <div class="strat active"><span class="name">Horns</span><span class="count">42</span></div>
+    <div class="strat"><span class="name">5-Out</span><span class="count">31</span></div>
+    <div class="strat"><span class="name">4-Out / 1-In</span><span class="count">28</span></div>
+    <div class="strat"><span class="name">Floppy</span><span class="count">19</span></div>
+    <div class="strat"><span class="name">Zipper</span><span class="count">14</span></div>
+
+    <h3>Strategy Families (Horns)</h3>
+    <div class="strat"><span class="name">Horns Fake Get</span><span class="meta">14 poss</span></div>
+    <div class="strat"><span class="name">Horns Backdoor</span><span class="meta">11 poss</span></div>
+    <div class="strat"><span class="name">Horns P&R</span><span class="meta">9 poss</span></div>
+    <div class="strat"><span class="name">Horns Flare</span><span class="meta">8 poss</span></div>
+  </div>
+
+  <!-- CENTER: VIDEO + TIMELINE -->
+  <div class="stage">
+    <div class="viewer">
+      <div class="court">🏀 COURT (broadcast frame)</div>
+      <div class="overlay">
+        <div class="player-dot" style="left:42%;top:55%"></div>
+        <div class="player-dot" style="left:55%;top:48%"></div>
+        <div class="player-dot b" style="left:48%;top:62%"></div>
+        <div class="player-dot b" style="left:60%;top:40%"></div>
+        <div class="ball" style="left:50%;top:50%"></div>
+        <div class="label" style="left:42%;top:44%">#11 PG</div>
+        <div class="label" style="left:60%;top:32%">Screen</div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%">
+          <line x1="50%" y1="50%" x2="48%" y2="62%" stroke="#22c55e" stroke-width="2" marker-end="url(#a)"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button>⏮</button><button>▶</button><button>⏭</button>
+      <span style="color:var(--muted)">Possession 3 of 42 · 0:14 / 0:24</span>
+    </div>
+
+    <div class="timeline">
+      <div class="seg" style="left:2%;width:6%"></div>
+      <div class="seg other" style="left:10%;width:5%"></div>
+      <div class="seg cur" style="left:18%;width:7%"></div>
+      <div class="seg" style="left:27%;width:6%"></div>
+      <div class="seg other" style="left:35%;width:5%"></div>
+      <div class="seg" style="left:42%;width:7%"></div>
+      <div class="seg" style="left:51%;width:6%"></div>
+      <div class="playhead" style="left:18%"></div>
+    </div>
+
+    <div style="color:var(--muted);font-size:11px">Click any segment to jump to that possession · blue = Horns, grey = other formation</div>
+  </div>
+
+  <!-- RIGHT: TACTICAL PANEL -->
+  <div class="panel">
+    <h3>Tactical Sequence — Horns Fake Get</h3>
+    <ul class="seq">
+      <li><span class="step">Formation</span><span class="ev">Horns set, PG at top <span class="conf">.94</span></span></li>
+      <li><span class="step">Action</span><span class="ev">Ball screen by 5 <span class="conf">.88</span></span></li>
+      <li><span class="step">Counter</span><span class="ev">Defender goes under → reject, backdoor <span class="conf">.81</span></span></li>
+      <li><span class="step">Final</span><span class="ev">Layup off backdoor cut <span class="conf">.79</span></span></li>
+    </ul>
+
+    <div class="correction">
+      <h3 style="margin:0">Coach Correction</h3>
+      <div class="row">
+        <button class="ok">✓ Accept</button>
+        <button class="no">✕ Wrong</button>
+      </div>
+      <select>
+        <option>Pick correct strategy…</option>
+        <option>Horns Backdoor</option>
+        <option>Horns P&R</option>
+        <option>Horns Flare</option>
+        <option>Unknown / Other</option>
+      </select>
+      <div style="color:var(--muted);font-size:11px;margin-top:8px">Corrections improve team-specific model accuracy.</div>
+    </div>
+
+    <div class="tendency">
+      <h3>Cross-Game Frequency (Horns)</h3>
+      <div class="bar"><span class="lbl">Game 1</span><span class="track"><span class="fill" style="width:72%"></span></span><span>15</span></div>
+      <div class="bar"><span class="lbl">Game 2</span><span class="track"><span class="fill" style="width:62%"></span></span><span>13</span></div>
+      <div class="bar"><span class="lbl">Game 3</span><span class="track"><span class="fill" style="width:67%"></span></span><span>14</span></div>
+      <div style="color:var(--muted);font-size:11px;margin-top:10px">Top players: #11 (9), #23 (7), #4 (5)</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
